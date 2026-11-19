@@ -12,7 +12,11 @@
 </head>
 <body>
 <header class="bar">
-  <a class="brand" href="#">India <b>Pulse</b></a>
+  <a class="brand" href="#desk">India <b>Pulse</b></a>
+  <nav class="views" aria-label="Views">
+    <a href="#desk" data-view="desk" aria-current="page">Desk</a>
+    <a href="#cities" data-view="cities">Cities</a>
+  </nav>
   <p class="stamp" id="stamp">Loading…</p>
   <a class="srclink" href="#sources">Sources &amp; method</a>
 </header>
@@ -51,6 +55,21 @@
     </div>
   </section>
 </main>
+
+<section id="cities" class="cities" aria-labelledby="matrix-h" hidden>
+  <div class="matrixbox">
+    <div class="mhead">
+      <h2 id="matrix-h">City matrix</h2>
+      <div class="seg" id="mmode" role="group" aria-label="What the colours show">
+        <button data-mmode="level" aria-pressed="true">Level today</button><button data-mmode="change">30-day change</button>
+      </div>
+      <p class="facts" id="facts"></p>
+      <div class="ramp" id="ramp" aria-hidden="true"></div>
+    </div>
+    <div class="mwrap"><table class="matrix" id="matrix"></table></div>
+    <p class="mnote" id="mnote"></p>
+  </div>
+</section>
 
 <footer id="sources" class="sources">
   <div>

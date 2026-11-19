@@ -238,9 +238,113 @@ function renderStatus() {
   }).join("");
 }
 
+// ---------- cities view: every city against every city-level indicator ----------
+const MATRIX = [
+  { key: "fuel.petrol", label: "Petrol", unit: "₹/L" }, { key: "fuel.diesel", label: "Diesel", unit: "₹/L" },
+  { key: "fuel.cng", label: "CNG", unit: "₹/kg" }, { key: "thali", label: "Thali", unit: "₹/plate, 7-day avg" },
+  { key: "aqi", label: "AQI", unit: "0–500" },
+];
+// sequential (level): one navy hue, light -> dark. diverging (change): fall green / neutral grey / rise red-brown.
+const SEQ = [["#e5e9f2", "#14213d"], ["#bcc4d8", "#14213d"], ["#8e99b8", "#14213d"], ["#46557a", "#fff"], ["#14213d", "#fff"]];
+const FALL = [["#d6eae0", "#14213d"], ["#93c4ad", "#14213d"], ["#1f6f50", "#fff"]];
+const RISE = [["#f2dcd7", "#14213d"], ["#d99a90", "#14213d"], ["#a8321d", "#fff"]];
+const MID = ["#eceef1", "#14213d"];
+const ord = (n) => n + (["th", "st", "nd", "rd"][(n % 100 - 20) % 10] || ["th", "st", "nd", "rd"][n % 100] || "th");
+st.mmode = store.get("mmode", "level");
+st.msort = { col: "score", dir: -1 };
+
+function cityMatrix() {
+  const rows = D.meta.cities.map((c) => ({ c, cells: {} }));
+  for (const m of MATRIX) {
+    const col = [];
+    for (const r of rows) {
+      const k = `${m.key}.${r.c}`, s = stat(k);
+      if (!s) continue;
+      const past = at(k, shift(s.date, -30));
+      col.push(r.cells[m.key] = { k, v: s.v, ch: past ? (s.v - past) / past * 100 : null, dp: dpOf(k) });
+    }
+    // percentile among cities (0 = lowest, 1 = highest; ties share), and rank 1 = highest
+    for (const f of ["v", "ch"]) {
+      const xs = col.filter((x) => x[f] != null).map((x) => x[f]);
+      for (const x of col) if (x[f] != null) {
+        const below = xs.filter((y) => y < x[f]).length, same = xs.filter((y) => y === x[f]).length;
+        x[f + "P"] = xs.length > 1 ? (below + (same - 1) / 2) / (xs.length - 1) : 0.5;
+        x[f + "R"] = xs.filter((y) => y > x[f]).length + 1;
+      }
+    }
+    col.maxCh = Math.max(...col.map((x) => Math.abs(x.ch ?? 0)), 1e-9);
+    m.col = col;
+  }
+  // pressure score: the average percentile across a city's indicators (higher = costlier / dirtier, or rising faster)
+  const f = st.mmode === "level" ? "vP" : "chP";
+  for (const r of rows) {
+    const ps = MATRIX.map((m) => r.cells[m.key]?.[f]).filter((p) => p != null);
+    r.score = ps.length ? Math.round(ps.reduce((a, b) => a + b, 0) / ps.length * 100) : null;
+  }
+  const sc = rows.filter((r) => r.score != null).map((r) => r.score);
+  rows.forEach((r) => { r.scoreR = sc.filter((s) => s > r.score).length + 1; });
+  return rows;
+}
+
+function cellColor(m, x) {
+  if (st.mmode === "level") return SEQ[Math.min(4, Math.floor(x.vP * 5))];
+  if (x.ch == null || Math.abs(x.ch) < 1e-6) return MID;
+  const s = x.ch / m.col.maxCh, i = Math.abs(s) < 0.15 ? -1 : Math.abs(s) < 0.45 ? 0 : Math.abs(s) < 0.75 ? 1 : 2;
+  return i < 0 ? MID : (s > 0 ? RISE : FALL)[i];
+}
+
+function renderCities() {
+  if (!D) return;
+  const rows = cityMatrix(), level = st.mmode === "level";
+  const get = st.msort.col === "c" ? (r) => r.c : st.msort.col === "score" ? (r) => r.score ?? -1
+    : (r) => r.cells[st.msort.col]?.[level ? "v" : "ch"] ?? -Infinity;
+  rows.sort((a, b) => (get(a) > get(b) ? 1 : get(a) < get(b) ? -1 : 0) * st.msort.dir);
+  const th = (col, label, unit) => `<th${st.msort.col === col ? ` aria-sort="${st.msort.dir > 0 ? "ascending" : "descending"}"` : ""}><button data-msort="${col}">${label}${st.msort.col === col ? chev(st.msort.dir) : ""}${unit ? `<small>${esc(unit)}</small>` : ""}</button></th>`;
+  const scoreUnit = level ? "0–100, higher = costlier & dirtier" : "0–100, higher = rising faster";
+  $("#matrix").innerHTML = `<thead><tr>${th("c", "City")}${MATRIX.map((m) => th(m.key, m.label, m.unit)).join("")}${th("score", "Pressure", scoreUnit)}</tr></thead><tbody>${
+    rows.map((r) => `<tr class="${r.c === st.city ? "me" : ""}"><td class="cityname">${esc(r.c)}</td>${MATRIX.map((m) => {
+      const x = r.cells[m.key];
+      if (!x) return `<td class="na" title="${esc(m.label)} is not sold or tracked in ${esc(r.c)}">—</td>`;
+      const [bg, fg] = cellColor(m, x), n = m.col.length;
+      const val = fmt(x.v, x.dp), chg = x.ch == null ? "—" : `${sgn(x.ch, 1)}%`;
+      const label = `${m.label} in ${r.c}: ${val} ${m.unit}, ${ord(x.vR)} highest of ${n}; 30-day change ${chg}`;
+      return `<td><button class="mcell" style="background:${bg};color:${fg}" data-cell="${x.k}" title="${esc(label)} · open on the desk" aria-label="${esc(label)}">
+        <b>${level ? val : chg}</b><small>${level ? `${ord(x.vR)} of ${n} · ${chg}` : `${val} · ${ord(x.chR)} fastest`}</small></button></td>`;
+    }).join("")}${r.score == null ? `<td class="na">—</td>` : `<td class="score"><button class="mcell" style="background:${SEQ[Math.min(4, Math.floor(r.score / 20))][0]};color:${SEQ[Math.min(4, Math.floor(r.score / 20))][1]}" data-mcity="${esc(r.c)}" title="Open ${esc(r.c)} on the desk" aria-label="${esc(r.c)} pressure score ${r.score}, ${ord(r.scoreR)} of ${rows.length}">
+      <b>${r.score}</b><small>${ord(r.scoreR)} of ${rows.length}</small></button></td>`}</tr>`).join("")}</tbody>`;
+
+  const ramp = (cols) => cols.map(([bg]) => `<i style="background:${bg}"></i>`).join("");
+  $("#ramp").innerHTML = level ? `<span>lowest of 20</span>${ramp(SEQ)}<span>highest</span>`
+    : `<span>falling</span>${ramp([...FALL].reverse())}${ramp([MID])}${ramp(RISE)}<span>rising (vs 30 days ago)</span>`;
+
+  const ranked = rows.filter((r) => r.score != null).sort((a, b) => b.score - a.score);
+  const moves = MATRIX.flatMap((m) => m.col.filter((x) => x.ch != null).map((x) => ({ m, x, c: cityOf(x.k) })));
+  const big = moves.sort((a, b) => Math.abs(b.x.ch) - Math.abs(a.x.ch))[0];
+  const aqiTop = MATRIX.find((m) => m.key === "aqi").col.slice().sort((a, b) => b.v - a.v)[0];
+  $("#facts").innerHTML = level
+    ? `<span>Most pressured: <b>${esc(ranked[0].c)}</b> (${ranked[0].score})</span><span>Least: <b>${esc(ranked.at(-1).c)}</b> (${ranked.at(-1).score})</span>` +
+      (aqiTop ? `<span>Worst air: <b>${esc(cityOf(aqiTop.k))}</b> (${fmt(aqiTop.v, 0)})</span>` : "")
+    : `<span>Heating fastest: <b>${esc(ranked[0].c)}</b></span><span>Cooling most: <b>${esc(ranked.at(-1).c)}</b></span>` +
+      (big ? `<span>Biggest 30-day move: <b>${esc(big.c)} ${esc(big.m.label)} ${sgn(big.x.ch, 1)}%</b></span>` : "");
+  $("#mnote").textContent = `Each indicator's colour ranks the 20 cities against each other. Pressure averages a city's ranks across the indicators it has. ` +
+    `Click any cell to open it on the desk. Thali is wholesale mandi cost; non-metro fuel history before daily tracking is reconstructed.`;
+  document.querySelectorAll("#mmode button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.mmode === st.mmode));
+}
+
+// ---------- views: desk / cities (switching never scrolls, the back button works) ----------
+function showView() {
+  const v = location.hash === "#cities" ? "cities" : location.hash === "#desk" || location.hash === "" ? "desk" : null;
+  if (!v) return;  // other anchors (e.g. #sources) keep the current view
+  $(".desk").hidden = v !== "desk"; $("#cities").hidden = v !== "cities";
+  document.querySelectorAll(".views a").forEach((a) => a.dataset.view === v ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
+  if (v === "cities") renderCities();
+  scrollTo(0, 0);
+}
+addEventListener("hashchange", showView);
+
 let AL = [];
 function renderWork() { renderControls(); renderReadout(); renderChart(); renderCompare(); }
-function render() { AL = alerts(); renderBoards(AL); renderMovers(AL); renderWork(); }
+function render() { AL = alerts(); renderBoards(AL); renderMovers(AL); renderWork(); renderCities(); }
 
 // ---------- actions: everything updates in place, nothing scrolls ----------
 function select(k) {
@@ -257,6 +361,15 @@ function setCity(c) {
 }
 document.addEventListener("click", (e) => {
   const t = e.target;
+  const cell = t.closest("[data-cell]")?.dataset.cell;          // matrix cell -> that city + metric on the desk
+  if (cell) {
+    if (groupOf(cell) !== groupOf(st.sel)) st.stock = null;
+    st.sel = cell; store.set("sel", cell); location.hash = "#desk"; return setCity(cityOf(cell));
+  }
+  const mc = t.closest("[data-mcity]")?.dataset.mcity; if (mc) { location.hash = "#desk"; return setCity(mc); }
+  const ms = t.closest("[data-msort]")?.dataset.msort;
+  if (ms) { st.msort = { col: ms, dir: st.msort.col === ms ? -st.msort.dir : ms === "c" ? 1 : -1 }; return renderCities(); }
+  const mm = t.closest("[data-mmode]")?.dataset.mmode; if (mm) { st.mmode = mm; store.set("mmode", mm); return renderCities(); }
   const k = t.closest("[data-k]")?.dataset.k; if (k) return select(k);
   const m = t.closest("[data-mover]")?.dataset.mover;
   if (m) {
@@ -287,7 +400,7 @@ Promise.all([getJSON("data/indicators.json"), getJSON("data/thali.json").catch((
   $("#city").innerHTML = D.meta.cities.map((c) => `<option>${esc(c)}</option>`).join("");
   const u = new Date(D.updated);
   $("#stamp").textContent = `Data as of ${u.toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" })} IST`;
-  renderStatus(); render();
+  renderStatus(); render(); showView();
 }).catch((err) => {
   $("#boards").innerHTML = `<div class="board empty"><b>Couldn't load today's data</b>indicators.json failed to load (${esc(err.message)}). Reload the page; if it keeps failing, the morning scrape may not have run yet.</div>`;
   $("#stamp").textContent = "Data unavailable";

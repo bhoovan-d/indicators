@@ -212,6 +212,13 @@ The corners are near square: 2px on digit windows, 3px on controls, 4px on panel
 - A segmented range control (active segment in navy).
 - Native selects with 1px rule borders and a 3px radius.
 
+### City matrix (Cities view)
+- **What:** all 20 cities against every city-level indicator (petrol, diesel, CNG, thali, AQI) plus a Pressure score, which is the average of a city's percentile ranks across the indicators it has.
+- **Level mode:** sequential, one navy hue, five steps light to dark: #e5e9f2, #bcc4d8, #8e99b8, #46557a, #14213d. The step comes from the city's percentile among the 20; darker means higher. Ink is navy on the three light steps and white on the two dark ones.
+- **30-day change mode:** diverging. Falling is green (#d6eae0, #93c4ad, #1f6f50), rising is red-brown (#f2dcd7, #d99a90, #a8321d), and the midpoint is neutral grey (#eceef1). Steps scale to the column's largest move.
+- **Cells:** 2px surface gap between fills (`border-spacing: 2px`), value on top and rank plus change below, a 2px navy inset ring on hover. A missing indicator renders as an enamel "—" cell.
+- **Behaviour:** clicking a cell opens that city and metric on the Desk, and the Back button returns to the matrix. Headers sort. The city column is sticky, and the table scrolls inside its box on phones.
+
 ## Do's and Don'ts
 
 ### Do:
