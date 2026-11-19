@@ -19,13 +19,12 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.11", cache: pip }
       - run: pip install -r requirements.txt
-      - run: python scrape.py
-        env:
-          DATA_GOV_KEY: ${{ secrets.DATA_GOV_KEY }}
+      - run: python scrape.py --skip-thali   # thali is scraped from a PC in India (run_thali.ps1)
       - name: Commit data
         run: |
           git config user.name "india-pulse-bot"
           git config user.email "actions@users.noreply.github.com"
           git add public/data/indicators.json
           git diff --cached --quiet || git commit -m "data: $(TZ=Asia/Kolkata date +'%Y-%m-%d %H:%M') IST"
+          git pull --rebase   # the PC may have pushed thali.json meanwhile; different files, so no conflict
           git push

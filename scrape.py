@@ -13,6 +13,9 @@ import requests
 from pypdf import PdfReader
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public", "data", "indicators.json")
+# Thali lives in its own file: data.gov.in blocks GitHub's servers, so it is scraped from a PC in India
+# (run_thali.ps1) while GitHub Actions writes everything else. Separate files mean their commits never conflict.
+THALI_OUT = os.path.join(os.path.dirname(OUT), "thali.json")
 IST = timezone(timedelta(hours=5, minutes=30))
 TODAY = datetime.now(IST).date()
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"}
@@ -99,10 +102,11 @@ def pdf_text(content):
 
 
 class Store:
-    def __init__(self, days):
+    def __init__(self, days, path=OUT):
+        self.path = path
         self.start = TODAY - timedelta(days=days)
         try:
-            self.d = json.load(open(OUT, encoding="utf8"))
+            self.d = json.load(open(path, encoding="utf8"))
         except FileNotFoundError:
             self.d = {"series": {}, "meta": {"status": {}}}
 
@@ -125,8 +129,8 @@ class Store:
         self.d["updated"] = datetime.now(IST).isoformat(timespec="minutes")
         for k, s in self.d["series"].items():
             self.d["series"][k] = dict(sorted(s.items()))
-        os.makedirs(os.path.dirname(OUT), exist_ok=True)
-        with open(OUT, "w", encoding="utf8") as f:
+        os.makedirs(os.path.dirname(self.path), exist_ok=True)
+        with open(self.path, "w", encoding="utf8") as f:
             json.dump(self.d, f, separators=(",", ":"))
 
 
@@ -358,7 +362,11 @@ def redact(s):
 
 
 def main():
+    """python scrape.py --skip-thali  (GitHub Actions)  |  python scrape.py --only-thali  (PC in India)"""
     window = int(sys.argv[sys.argv.index("--days") + 1]) if "--days" in sys.argv else 90
+    if "--only-thali" in sys.argv:
+        st = Store(window, THALI_OUT)
+        return run_jobs(st, [("thali_mandi", lambda: thali_mandi(st))])
     st = Store(window)
     jobs = [("fuel_ppac", lambda: fuel_ppac(st))]
     for city, (slug, *_ ) in CITIES.items():
@@ -368,6 +376,12 @@ def main():
         jobs.append((f"cng_{city}", lambda c=city, s=slug: cng_goodreturns(st, c, s)))
     jobs += [("gold_ibja", lambda: gold_ibja(st)), ("aqi_cpcb", lambda: aqi_cpcb(st)),
              ("thali_mandi", lambda: thali_mandi(st)), ("stocks", lambda: stocks_yahoo(st))]
+    if "--skip-thali" in sys.argv:
+        jobs = [j for j in jobs if j[0] != "thali_mandi"]
+    run_jobs(st, jobs)
+
+
+def run_jobs(st, jobs):
     status = st.d["meta"].setdefault("status", {})
     failed = 0
     for name, fn in jobs:

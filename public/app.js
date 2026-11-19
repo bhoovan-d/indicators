@@ -274,7 +274,13 @@ document.addEventListener("click", (e) => {
 $("#city").addEventListener("change", (e) => setCity(e.target.value));
 $("#stock").addEventListener("change", (e) => { st.stock = e.target.value; renderChart(); renderCompare(); });
 
-fetch("data/indicators.json", { cache: "no-cache" }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((d) => {
+// thali.json is written by a PC in India (data.gov.in blocks GitHub's servers); it is optional and merged in
+const getJSON = (u) => fetch(u, { cache: "no-cache" }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+Promise.all([getJSON("data/indicators.json"), getJSON("data/thali.json").catch(() => null)]).then(([d, t]) => {
+  if (t) {
+    Object.assign(d.series, t.series);
+    Object.assign(d.meta.status, t.meta.status);
+  }
   D = d;
   if (!D.meta.cities.includes(st.city)) st.city = "Delhi";
   if (!pts(st.sel).length) st.sel = `fuel.petrol.${st.city}`;
