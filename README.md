@@ -23,11 +23,24 @@ $env:DATA_GOV_KEY = "<your data.gov.in key>"   # optional; the public demo key g
 python -m http.server 8765 --directory public  # then open http://localhost:8765
 ```
 
-## Deploy (GitHub Actions + Vercel)
+## How it updates
 
-1. Push this folder to a GitHub repo.
-2. In the repo, go to Settings → Secrets and variables → Actions and add `DATA_GOV_KEY`. Get a free key at data.gov.in: sign up, then My Account → API key.
-3. In Vercel, import the repo. Choose framework "Other" with no build command; the output directory `public` comes from `vercel.json`.
-4. `.github/workflows/scrape.yml` runs at 07:30 and 17:00 IST and commits `public/data/indicators.json`. Each commit redeploys Vercel. You can also run it by hand from the Actions tab.
+Live at https://india-pulse-phi.vercel.app (Vercel project `bhoovan-int/india-pulse`, linked to this repo). Every push redeploys it.
 
-If a government site blocks GitHub's US runners, that source shows "failing" under Sources on the dashboard and every other source keeps working. The fallback is to run `scrape.py` on any machine in India and push the result.
+| What | Where it runs | When | Writes |
+|---|---|---|---|
+| Fuel, gold, AQI, stocks | GitHub Actions (`.github/workflows/scrape.yml`, `scrape.py --skip-thali`) | 07:30 and 17:00 IST, and whenever the scraper changes | `public/data/indicators.json` |
+| Thali | This PC: Windows task **India Pulse thali** runs `run_thali.ps1` (`scrape.py --only-thali`) | 08:00 daily, or at next login if the PC was off | `public/data/thali.json` |
+
+Thali runs from a PC because data.gov.in times out every connection from GitHub's US servers. The two writers use separate files, so their commits never conflict, and the dashboard merges them.
+
+- The PC needs the data.gov.in key in `.env` (gitignored; the bare key or `DATA_GOV_KEY=...`). GitHub no longer needs it.
+- Check the PC job's log in `thali.log`. Run it by hand with `powershell -File run_thali.ps1`.
+- If a source fails, it shows "failing" under Sources on the dashboard and the others keep working.
+
+To set this up on another machine, register the same task:
+
+```powershell
+$a = New-ScheduledTaskAction -Execute powershell.exe -Argument '-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "<path>\run_thali.ps1"'
+Register-ScheduledTask -TaskName "India Pulse thali" -Action $a -Trigger (New-ScheduledTaskTrigger -Daily -At 8:00am) -Settings (New-ScheduledTaskSettingsSet -StartWhenAvailable -RunOnlyIfNetworkAvailable)
+```
