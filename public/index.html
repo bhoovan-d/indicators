@@ -6,50 +6,51 @@
 <title>India Pulse · daily street-level indicators</title>
 <meta name="description" content="Fuel, gold, thali cost and AQI across 20 Indian cities, with the stocks they move. Refreshed every morning.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%2314213d'/%3E%3Crect y='26' width='32' height='6' fill='%23e8590c'/%3E%3Cpath d='M6 18h5l3-8 4 12 3-6h5' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23133b2f'/%3E%3Crect y='26' width='32' height='6' fill='%23f08a00'/%3E%3Cpath d='M6 18h5l3-8 4 12 3-6h5' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3C/svg%3E">
 </head>
 <body>
 <header class="bar">
   <a class="brand" href="#desk">India <b>Pulse</b></a>
-  <nav class="views" aria-label="Views">
-    <a href="#desk" data-view="desk" aria-current="page">Desk</a>
-    <a href="#cities" data-view="cities">Cities</a>
+  <nav class="views" aria-label="Views" data-ia="Views">
+    <a href="#desk" data-view="desk" aria-current="page" data-i>Desk</a>
+    <a href="#cities" data-view="cities" data-i>Cities</a>
   </nav>
   <p class="stamp" id="stamp">Loading…</p>
-  <a class="srclink" href="#sources">Sources &amp; method</a>
+  <a class="srclink" href="#sources" data-i="Sources & method">Sources &amp; method</a>
+  <label class="langbox"><span class="langicon" aria-hidden="true">अ/A</span><select id="lang" class="lang" aria-label="Language" data-ia="Language"></select></label>
 </header>
 
 <main class="desk">
-  <aside id="boards" class="rail" aria-label="Indicator boards" aria-busy="true">
-    <article class="board loading"><header><h2>Fuel</h2></header><div class="rows"></div></article>
-    <article class="board loading"><header><h2>Gold</h2></header><div class="rows"></div></article>
-    <article class="board loading"><header><h2>Thali</h2></header><div class="rows"></div></article>
+  <aside id="boards" class="rail" aria-label="Indicator boards" data-ia="Indicator boards" aria-busy="true">
+    <article class="board loading"><header><h2 data-i>Fuel</h2></header><div class="rows"></div></article>
+    <article class="board loading"><header><h2 data-i>Gold</h2></header><div class="rows"></div></article>
+    <article class="board loading"><header><h2 data-i>Thali</h2></header><div class="rows"></div></article>
     <article class="board loading"><header><h2>AQI</h2></header><div class="rows"></div></article>
   </aside>
 
-  <section class="work" aria-label="Workspace">
+  <section class="work" aria-label="Workspace" data-ia="Workspace">
     <div class="workbar">
       <div class="readout" id="readout" aria-live="polite"></div>
       <div class="controls">
-        <div class="seg" id="metric" role="group" aria-label="Metric"></div>
-        <label class="ctl">City <select id="city"></select></label>
-        <div class="seg" id="range" role="group" aria-label="Time range">
-          <button data-r="7">7D</button><button data-r="30">30D</button><button data-r="90" aria-pressed="true">90D</button><button data-r="0">All</button>
+        <div class="seg" id="metric" role="group" aria-label="Metric" data-ia="Metric"></div>
+        <label class="ctl"><span data-i>City</span> <select id="city"></select></label>
+        <div class="seg" id="range" role="group" aria-label="Time range" data-ia="Time range">
+          <button data-r="7">7D</button><button data-r="30">30D</button><button data-r="90" aria-pressed="true">90D</button><button data-r="0" data-i>All</button>
         </div>
-        <label class="ctl">Compare with stock <select id="stock"></select></label>
+        <label class="ctl"><span data-i>Compare with stock</span> <select id="stock"></select></label>
       </div>
     </div>
     <div id="plot" class="plot"></div>
     <p class="legend" id="legend"></p>
     <div class="lower">
       <section class="pane" aria-labelledby="compare-h">
-        <div class="panehead"><h2 id="compare-h">Compare</h2><span class="hint" id="compare-hint"></span></div>
+        <div class="panehead"><h2 id="compare-h" data-i>Compare</h2><span class="hint" id="compare-hint"></span></div>
         <div class="scroll"><table id="rank"></table></div>
       </section>
       <section class="pane" aria-labelledby="movers-h">
-        <div class="panehead"><h2 id="movers-h">Movers</h2><span class="hint">Day and week changes that cross alert lines</span></div>
+        <div class="panehead"><h2 id="movers-h" data-i>Movers</h2><span class="hint" data-i>Day and week changes that cross alert lines</span></div>
         <ol id="movers" class="scroll"></ol>
       </section>
     </div>
@@ -59,9 +60,9 @@
 <section id="cities" class="cities" aria-labelledby="matrix-h" hidden>
   <div class="matrixbox">
     <div class="mhead">
-      <h2 id="matrix-h">City matrix</h2>
-      <div class="seg" id="mmode" role="group" aria-label="What the colours show">
-        <button data-mmode="level" aria-pressed="true">Level today</button><button data-mmode="change">30-day change</button>
+      <h2 id="matrix-h" data-i>City matrix</h2>
+      <div class="seg" id="mmode" role="group" aria-label="What the colours show" data-ia="What the colours show">
+        <button data-mmode="level" aria-pressed="true" data-i>Level today</button><button data-mmode="change" data-i>30-day change</button>
       </div>
       <p class="facts" id="facts"></p>
       <div class="ramp" id="ramp" aria-hidden="true"></div>
@@ -73,18 +74,19 @@
 
 <footer id="sources" class="sources">
   <div>
-    <h2>Sources</h2>
+    <h2 data-i>Sources</h2>
     <ul id="status" class="status"></ul>
   </div>
   <ul class="notes">
-    <li><b>Fuel.</b> Metro petrol and diesel are IOC retail prices published by PPAC. Other cities come from goodreturns.in; their history before daily tracking began is reconstructed from monthly summaries and drawn dashed. CNG history is monthly.</li>
-    <li><b>Gold.</b> IBJA benchmark rates, PM where published, else AM. They exclude 3% GST and making charges and are the same nationwide.</li>
-    <li><b>Thali.</b> The cost of raw ingredients for one veg thali (rice, wheat, tur dal, onion, tomato, potato) at Agmarknet mandi modal prices. These are wholesale prices, not retail. Each city uses the median of its own district's markets, falling back to its state, then to all-India. Plate cost is shown as a 7-day average because a city's daily figure swings when only a few of its mandis report; the raw daily cost stays visible on the chart.</li>
-    <li><b>AQI.</b> The CPCB daily bulletin: a 24-hour average city AQI as of 4 PM.</li>
+    <li data-i="note.fuel"><b>Fuel.</b> Metro petrol and diesel are IOC retail prices published by PPAC. Other cities come from goodreturns.in; their history before daily tracking began is reconstructed from monthly summaries and drawn dashed. CNG history is monthly.</li>
+    <li data-i="note.gold"><b>Gold.</b> IBJA benchmark rates, PM where published, else AM. They exclude 3% GST and making charges and are the same nationwide.</li>
+    <li data-i="note.thali"><b>Thali.</b> The cost of raw ingredients for one veg thali (rice, wheat, tur dal, onion, tomato, potato) at Agmarknet mandi modal prices. These are wholesale prices, not retail. Each city uses the median of its own district's markets, falling back to its state, then to all-India. Plate cost is shown as a 7-day average because a city's daily figure swings when only a few of its mandis report; the raw daily cost stays visible on the chart.</li>
+    <li data-i="note.aqi"><b>AQI.</b> The CPCB daily bulletin: a 24-hour average city AQI as of 4 PM.</li>
   </ul>
 </footer>
 
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<script src="i18n.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

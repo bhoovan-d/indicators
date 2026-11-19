@@ -4,18 +4,18 @@
   "title": "Design System: India Pulse",
   "extensions": {
     "colorMeta": {
-      "canopy-navy": { "role": "primary", "displayName": "Canopy Navy", "canonical": "#14213d", "tonalRamp": ["#0a1120", "#14213d", "#2b3a5c", "#46557a", "#66749a", "#8e99b8", "#bcc4d8", "#e5e9f2"] },
-      "forecourt-orange": { "role": "secondary", "displayName": "Forecourt Orange", "canonical": "#e8590c", "tonalRamp": ["#5a2104", "#8a3307", "#b9450a", "#e8590c", "#f07e3f", "#f5a173", "#f9c6a8", "#fde8dc"] },
-      "steel-enamel": { "role": "neutral", "displayName": "Steel Enamel", "canonical": "#e9ecf0", "tonalRamp": ["#2a2f37", "#4a525e", "#6e7785", "#959dab", "#b9c0cb", "#d3d8e0", "#e9ecf0", "#fbfcfd"] },
+      "canopy-green": { "role": "primary", "displayName": "Canopy Green", "canonical": "#133b2f", "tonalRamp": ["#0a1f18", "#133b2f", "#23564a", "#3b6b5a", "#5c8775", "#7fa694", "#b2cdbf", "#e0ebe5"] },
+      "signal-saffron": { "role": "secondary", "displayName": "Signal Saffron", "canonical": "#f08a00", "tonalRamp": ["#4a2a00", "#7a4500", "#a85c00", "#f08a00", "#f5a53d", "#f8bf75", "#fbd9ac", "#fdeedb"] },
+      "steel-enamel": { "role": "neutral", "displayName": "Steel Enamel", "canonical": "#e7ebe6", "tonalRamp": ["#2a2f37", "#4a525e", "#6e7785", "#959dab", "#b9c0cb", "#d3d8e0", "#e7ebe6", "#fbfcfa"] },
       "rise": { "role": "state", "displayName": "Rise", "canonical": "#a8321d" },
-      "fall": { "role": "state", "displayName": "Fall", "canonical": "#1f6f50" }
+      "fall": { "role": "state", "displayName": "Fall", "canonical": "#1e5fa0" }
     },
     "typographyMeta": {
       "board-digits": { "displayName": "Board digits", "purpose": "Every headline price, inside a digit window." },
       "board-title": { "displayName": "Board title", "purpose": "FUEL / GOLD / THALI / AQI headers." }
     },
     "shadows": [
-      { "name": "selected-frame", "value": "inset 0 0 0 2px #14213d", "purpose": "Selected digit window only; a state marker, not depth." }
+      { "name": "selected-frame", "value": "inset 0 0 0 2px #133b2f", "purpose": "Selected digit window only; a state marker, not depth." }
     ],
     "motion": [
       { "name": "digit-flip", "value": "700ms cubic-bezier(.16,1,.3,1), 80ms stagger", "purpose": "A revised value slides into its window on first load only; off under reduced motion." }
@@ -33,15 +33,15 @@
       "refersTo": "digit-cell",
       "description": "Label, digit window, and day/week change.",
       "html": "<button class=\"ds-row\"><span class=\"ds-k\">Petrol<small>18 Nov</small></span><span class=\"ds-v\">102.12</span><span class=\"ds-d\">+0.12<small>wk 0.00</small></span></button>",
-      "css": ".ds-row{display:grid;grid-template-columns:1fr auto 76px;align-items:center;gap:12px;width:320px;padding:6px 14px;border:0;border-bottom:1px solid #e4e8ee;background:#fbfcfd;font:15px Barlow,system-ui,sans-serif;color:#14213d;text-align:left;cursor:pointer}.ds-row:hover{background:#f1f4f8}.ds-row:focus-visible{outline:2px solid #14213d;outline-offset:2px}.ds-k{font-weight:600}.ds-k small,.ds-d small{display:block;font-weight:500;font-size:12px;color:#6b7489}.ds-v{font:700 38px/1 'Barlow Condensed',sans-serif;font-variant-numeric:tabular-nums;background:#14213d;color:#f2f4f8;padding:4px 9px 2px;border-radius:2px}.ds-d{text-align:right;font:600 16px 'Barlow Condensed',sans-serif;color:#a8321d}"
+      "css": ".ds-row{display:grid;grid-template-columns:1fr auto 76px;align-items:center;gap:12px;width:320px;padding:6px 14px;border:0;border-bottom:1px solid #e2e8e3;background:#fbfcfa;font:15px Barlow,system-ui,sans-serif;color:#133b2f;text-align:left;cursor:pointer}.ds-row:hover{background:#f1f4f8}.ds-row:focus-visible{outline:2px solid #133b2f;outline-offset:2px}.ds-k{font-weight:600}.ds-k small,.ds-d small{display:block;font-weight:500;font-size:12px;color:#5f6f68}.ds-v{font:700 38px/1 'Barlow Condensed',sans-serif;font-variant-numeric:tabular-nums;background:#133b2f;color:#f1f5f2;padding:4px 9px 2px;border-radius:2px}.ds-d{text-align:right;font:600 16px 'Barlow Condensed',sans-serif;color:#a8321d}"
     },
     {
       "name": "Board header",
       "kind": "card",
       "refersTo": "board-header",
-      "description": "Navy header naming the indicator, unit and source.",
+      "description": "Green header naming the indicator, unit and source.",
       "html": "<header class=\"ds-bh\"><h2>Fuel</h2><span>₹/L · PPAC (IOC)</span></header>",
-      "css": ".ds-bh{display:flex;justify-content:space-between;align-items:baseline;padding:8px 14px;background:#14213d;color:#fff;width:320px;border-radius:4px 4px 0 0}.ds-bh h2{margin:0;font:700 24px/1.1 'Barlow Condensed',sans-serif;letter-spacing:.05em;text-transform:uppercase}.ds-bh span{color:#c4cad8;font:13px Barlow,sans-serif}"
+      "css": ".ds-bh{display:flex;justify-content:space-between;align-items:baseline;padding:8px 14px;background:#133b2f;color:#fff;width:320px;border-radius:4px 4px 0 0}.ds-bh h2{margin:0;font:700 24px/1.1 'Barlow Condensed',sans-serif;letter-spacing:.05em;text-transform:uppercase}.ds-bh span{color:#bfd0c8;font:13px Barlow,sans-serif}"
     },
     {
       "name": "Alert strip",
@@ -57,27 +57,27 @@
       "refersTo": "segmented-on",
       "description": "Chart range.",
       "html": "<div class=\"ds-seg\"><button>30D</button><button aria-pressed=\"true\">90D</button><button>All</button></div>",
-      "css": ".ds-seg{display:inline-flex;border:1px solid #cfd5de;border-radius:3px;overflow:hidden}.ds-seg button{border:0;background:#fbfcfd;padding:5px 10px;font:600 15px Barlow,sans-serif;color:#14213d;cursor:pointer}.ds-seg button+button{border-left:1px solid #cfd5de}.ds-seg button[aria-pressed=true]{background:#14213d;color:#fff}.ds-seg button:focus-visible{outline:2px solid #14213d;outline-offset:-2px}"
+      "css": ".ds-seg{display:inline-flex;border:1px solid #cdd6d0;border-radius:3px;overflow:hidden}.ds-seg button{border:0;background:#fbfcfa;padding:5px 10px;font:600 15px Barlow,sans-serif;color:#133b2f;cursor:pointer}.ds-seg button+button{border-left:1px solid #cdd6d0}.ds-seg button[aria-pressed=true]{background:#133b2f;color:#fff}.ds-seg button:focus-visible{outline:2px solid #133b2f;outline-offset:-2px}"
     },
     {
       "name": "Top bar",
       "kind": "nav",
-      "description": "Canopy fascia with the orange band.",
+      "description": "Canopy fascia with the saffron band.",
       "html": "<nav class=\"ds-bar\"><b>India <i>Pulse</i></b><a>Boards</a><a>Compare</a></nav>",
-      "css": ".ds-bar{display:flex;gap:20px;align-items:center;padding:10px 24px;background:#14213d;border-bottom:4px solid #e8590c}.ds-bar b{font:700 26px/1 'Barlow Condensed',sans-serif;text-transform:uppercase;color:#fff;letter-spacing:.04em}.ds-bar i{font-style:normal;color:#e8590c}.ds-bar a{color:#c4cad8;font:600 15px Barlow,sans-serif;cursor:pointer}.ds-bar a:hover{color:#fff;box-shadow:inset 0 -2px #fff}"
+      "css": ".ds-bar{display:flex;gap:20px;align-items:center;padding:10px 24px;background:#133b2f;border-bottom:4px solid #f08a00}.ds-bar b{font:700 26px/1 'Barlow Condensed',sans-serif;text-transform:uppercase;color:#fff;letter-spacing:.04em}.ds-bar i{font-style:normal;color:#f08a00}.ds-bar a{color:#bfd0c8;font:600 15px Barlow,sans-serif;cursor:pointer}.ds-bar a:hover{color:#fff;box-shadow:inset 0 -2px #fff}"
     }
   ],
   "narrative": {
     "northStar": "The Morning Rate Board",
-    "overview": "India Pulse posts the country's street-level prices the way a fuel station posts its rates. Navy canopy fascia runs across the top, cool white enamel panels sit below, and every price sits in a dark window with light, heavy, condensed digits that are revised in place each morning. The system serves a trader scanning before the open, so density and alignment come before decoration.",
+    "overview": "India Pulse posts the country's street-level prices the way a fuel station posts its rates. Green canopy fascia runs across the top, cool white enamel panels sit below, and every price sits in a dark window with light, heavy, condensed digits that are revised in place each morning. The system serves a trader scanning before the open, so density and alignment come before decoration.",
     "keyCharacteristics": [
-      "Prices in fixed-width navy digit windows, aligned within each board.",
-      "One reserved accent: forecourt orange marks the selected city and nothing else.",
+      "Prices in fixed-width green digit windows, aligned within each board.",
+      "One reserved accent: signal saffron marks the selected city and nothing else.",
       "Line form carries data state: solid means observed, dashed means reconstructed.",
       "Flat enamel: no shadows, gradients or glow."
     ],
     "rules": [
-      { "name": "The Reserved Orange Rule", "body": "Forecourt orange means \"your city\". Any other use of orange, or a tint of it, breaks the rule; alerts use the rise family instead.", "section": "colors" },
+      { "name": "The Reserved Saffron Rule", "body": "Signal saffron means \"your city\". Any other use of saffron, or a tint of it, breaks the rule; alerts use the rise family instead.", "section": "colors" },
       { "name": "The Tabular Rule", "body": "Every number on screen uses tabular figures, so digits line up down a column.", "section": "typography" },
       { "name": "The Enamel Rule", "body": "Surfaces are flat painted enamel: no bevels, gradients, glows or blur.", "section": "elevation" }
     ],
@@ -85,10 +85,10 @@
       "Do put every headline price in a digit window and keep windows the same width within a board.",
       "Do name the unit and the source in every board header.",
       "Do draw reconstructed history dashed and say so in the chart legend.",
-      "Do use rise (#a8321d) and fall (#1f6f50) for change, and slate for no change."
+      "Do use rise (#a8321d) and fall (#1e5fa0) for change, and slate for no change."
     ],
     "donts": [
-      "Don't use orange for anything but the selected city and the canopy band.",
+      "Don't use saffron for anything but the selected city and the canopy band.",
       "Don't render digits as glowing LEDs or add neon, glass or gradients.",
       "Don't fall back to KPI cards with floating sparklines; values live in board rows.",
       "Don't mark selection with a colored side stripe."
