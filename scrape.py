@@ -352,6 +352,11 @@ def stocks_yahoo(st):
             st.d["meta"].setdefault("stocks", {})[tk] = {"group": group, "name": r["meta"].get("shortName") or tk}
 
 
+def redact(s):
+    s = re.sub(r"(api[-_]?key=)[^&\s'\")]+", r"\1***", s, flags=re.I)
+    return s.replace(DATA_GOV_KEY, "***") if DATA_GOV_KEY else s
+
+
 def main():
     window = int(sys.argv[sys.argv.index("--days") + 1]) if "--days" in sys.argv else 90
     st = Store(window)
@@ -372,8 +377,9 @@ def main():
             status[name] = {"ok": True, "at": datetime.now(IST).isoformat(timespec="minutes")}
         except Exception as e:
             failed += 1
-            print(f"  FAILED: {e!r}")
-            status[name] = {**status.get(name, {}), "ok": False, "error": str(e)[:200]}
+            err = redact(repr(e))  # errors are published in indicators.json: never let a key through
+            print(f"  FAILED: {err}")
+            status[name] = {**status.get(name, {}), "ok": False, "error": err[:200]}
         st.save()  # save after every job so a crash never loses earlier work
     st.d["meta"]["cities"] = list(CITIES)
     st.d["meta"]["thali_basket_kg"] = {k: kg for k, (_, _, kg) in THALI.items()}

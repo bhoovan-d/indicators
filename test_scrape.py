@@ -37,6 +37,9 @@ def run():
     t = st.d["series"]["thali.Delhi"]
     assert t["2026-11-10"] == 10 and t["2026-11-11"] == 15 and t["2026-11-17"] == 30, t  # 17th window: 11th..17th
 
+    # published error strings must never contain an API key
+    assert "abc123" not in scrape.redact("Max retries: /resource/x?api-key=abc123&format=json"), "key leaked"
+
     print("ok")
 
 
