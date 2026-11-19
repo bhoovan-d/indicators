@@ -140,7 +140,7 @@ function renderControls() {
   $("#city").value = st.city;
   const tks = Object.entries(D.meta.stocks || {}).filter(([, m]) => m.group === groupOf(st.sel));
   if (st.stock !== "" && !tks.some(([t]) => t === st.stock)) st.stock = tks[0]?.[0] ?? "";
-  $("#stock").innerHTML = `<option value="">None</option>` + tks.map(([t, m]) => `<option value="${esc(t)}"${t === st.stock ? " selected" : ""}>${esc(m.name)}</option>`).join("");
+  $("#stock").innerHTML = `<option value="">No stock</option>` + tks.map(([t, m]) => `<option value="${esc(t)}"${t === st.stock ? " selected" : ""}>${esc(m.name)}</option>`).join("");
 }
 
 const windowFrom = () => st.range ? shift(today(), -st.range) : "0";
@@ -205,7 +205,7 @@ function renderCompare() {
     rows = Object.entries(D.meta.stocks || {}).filter(([, m]) => m.group === groupOf(st.sel))
       .map(([t, m]) => ({ c: m.name, s: stat("stock." + t), stock: t })).filter((r) => r.s);
     dp = 2; label = "Linked stocks";
-    $("#compare-hint").textContent = `NSE close · ${LABEL[kindOf(st.sel)] || LABEL[st.sel] || "this rate"} is one national number · click to overlay`;
+    $("#compare-hint").textContent = `NSE close · ${LABEL[kindOf(st.sel)] || LABEL[st.sel] || "this rate"} is one national number · click a stock to compare it on the chart`;
   }
   const get = { c: (r) => r.c, v: (r) => r.s.v, dd: (r) => (cityWise ? r.s.dd : r.s.pd) ?? 0, dw: (r) => (cityWise ? r.s.dw : r.s.pw) ?? 0 }[st.sort.col];
   rows.sort((a, b) => (get(a) > get(b) ? 1 : get(a) < get(b) ? -1 : 0) * st.sort.dir);
