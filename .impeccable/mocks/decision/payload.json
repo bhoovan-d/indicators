@@ -1,0 +1,82 @@
+{
+  "title": "India Pulse: choose the visual world",
+  "question": "The roll assigned the Pump Price Board. Keep it, take an alternate, or re-roll.",
+  "options": [
+    {
+      "id": "assigned",
+      "kind": "assigned",
+      "label": "Pump Price Board",
+      "kicker": "THE ROLL",
+      "lineage": "Indian fuel-station price totems and canopy fascia",
+      "thesis": "Every indicator is posted like the rate board at a fuel station: big tabular digits on enamel panels, revised in place each morning.",
+      "palette": ["#f4f2ec", "#14213d", "#e8590c", "#1f6f50", "#b42318"],
+      "materials": ["enamel sign panels", "stencilled tabular digits", "brand-band stripes"],
+      "viewport": "Top bar with city picker and date. Four enamel panels (Fuel, Gold, Thali, AQI), each a price-board stack of rows with large digits, Δd/Δw and a 90-day line. A movers strip and a cross-city ranked board sit below.",
+      "risk": "If the digits are rendered as glowing LEDs it slides into neon; it has to stay as daylight enamel.",
+      "raised": [
+        {"from": "operate-c-emission-line-rail", "raise": "Data state is drawn as line form, not hue: real quotes are solid, reconstructed history is dashed, stale data is half-tone."},
+        {"from": "notation-diagram-systems-orienteering-map", "raise": "One reserved colour marks the selected city across every panel, chart and ranking, and nothing else uses it."},
+        {"from": "crouwel-grid-specimen", "raise": "Every board shares one strict column grid, so digits align across panels and the page scans like a single posted board."}
+      ],
+      "html": ".impeccable/mocks/decision/assigned.html"
+    },
+    {
+      "id": "model-pick",
+      "kind": "pick",
+      "label": "RBI Statistical Handbook",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "RBI Handbook of Statistics and government statistical bulletins",
+      "thesis": "India's daily street-level data set like an official statistical table: ruled, numbered and footnoted down to its provenance.",
+      "palette": ["#f1ead9", "#1d1b17", "#7a1f1f", "#2f4858"],
+      "materials": ["buff ledger paper", "ruled tables", "numbered footnotes"],
+      "viewport": "Four table-panels in a 2x2 grid, each a numbered statistical table with a sparkline column and source footnotes. The alert rail runs on the right.",
+      "risk": "Familiar: it lands near the editorial broadsheet look many finance dashboards already wear.",
+      "html": ".impeccable/mocks/decision/model-pick.html"
+    },
+    {
+      "id": "challenger-gateboard",
+      "kind": "challenger",
+      "catalogId": "vernacular-ephemera-boarding-pass-and-gate-board",
+      "label": "Departure Board",
+      "verdict": "competitive",
+      "lineage": "airport gate boards and boarding passes",
+      "thesis": "Cities rank like departures, and a revised price stays lit until you have seen it.",
+      "palette": ["#0f1720", "#e9edf1", "#f2b705", "#d64545"],
+      "materials": ["high-contrast neutral panels", "tabular figures", "one alert colour"],
+      "viewport": "Four indicator panels, each a ranked board of cities. Changed rows hold a yellow mark until acknowledged.",
+      "case": "Fuses well: reranking and persistent change state fit the morning scan, but traders identify with it less than with fuel-station boards.",
+      "risk": "A dark board can drift toward a terminal costume.",
+      "hero": "https://impeccable.style/worlds/cards/vernacular-ephemera-boarding-pass-and-gate-board-hero.webp",
+      "html": ".impeccable/mocks/decision/challenger-gateboard.html"
+    },
+    {"id": "challenger-rail", "kind": "challenger", "catalogId": "operate-c-emission-line-rail", "label": "Emission-Line Rail", "verdict": "declined",
+     "lineage": "spectrogram plates", "thesis": "Values as hairlines on one calibrated rail.", "palette": ["#2a2b2e", "#e8e4da", "#f5c518"], "materials": ["charcoal continuum", "hairlines"],
+     "viewport": "One rail per indicator with cities as ticks.", "risk": "Too abstract for a quick scan.", "case": "Loses on audience identification and clarity.", "kept": "State as line form: solid real, dashed reconstructed."},
+    {"id": "challenger-emigre", "kind": "challenger", "catalogId": "emigre-bitmap-specimen", "label": "Bitmap Specimen", "verdict": "declined",
+     "lineage": "Emigre specimens", "thesis": "Pixel type at poster scale.", "palette": ["#ffffff", "#111111", "#ff3b00"], "materials": ["halftone", "bitmap type"],
+     "viewport": "Giant pixel numerals.", "risk": "Novelty over task.", "case": "Loses on both axes.", "kept": "One face across many sizes."},
+    {"id": "challenger-orienteering", "kind": "challenger", "catalogId": "notation-diagram-systems-orienteering-map", "label": "Orienteering Map", "verdict": "declined",
+     "lineage": "ISOM maps", "thesis": "Terrain colours with one purple course.", "palette": ["#ffffff", "#7a5c2e", "#9b2fae"], "materials": ["contour lines"],
+     "viewport": "City map with a course overlay.", "risk": "A map adds nothing for 20 cities.", "case": "Loses on both axes.", "kept": "One reserved colour for the active selection."},
+    {"id": "challenger-feed", "kind": "challenger", "catalogId": "pop-culture-shelf-vertical-video-feed-surface", "label": "Vertical Feed", "verdict": "declined",
+     "lineage": "short-video feeds", "thesis": "One item per screen.", "palette": ["#000000", "#ffffff"], "materials": ["full-bleed media"],
+     "viewport": "One indicator per snap.", "risk": "Kills density.", "case": "Loses on both axes.", "kept": "Preloading the next state so switching is instant."},
+    {"id": "challenger-crouwel", "kind": "challenger", "catalogId": "crouwel-grid-specimen", "label": "Crouwel Grid", "verdict": "declined",
+     "lineage": "Wim Crouwel posters", "thesis": "The grid is the armature.", "palette": ["#ffffff", "#1b1b1b", "#2d5bff"], "materials": ["visible grid"],
+     "viewport": "Grid-built numerals.", "risk": "Poster, not instrument.", "case": "Loses on both axes.", "kept": "One strict shared column grid."}
+  ],
+  "reroll": {"registers": ["safer", "bolder"]},
+  "buildPath": {"value": "code"},
+  "canon": true,
+  "canonCard": {
+    "kind": "canon",
+    "label": "The category standard",
+    "thesis": "A TradingView/Koyfin-style grid of KPI cards with sparklines, a main chart and a watchlist table, executed cleanly.",
+    "palette": ["#ffffff", "#0f172a", "#2563eb", "#16a34a", "#dc2626"],
+    "materials": ["clean card grid", "sparklines"],
+    "viewport": "Four KPI cards, a main chart with the stock overlay, and a city table.",
+    "risk": "Indistinguishable from any market dashboard by design.",
+    "html": ".impeccable/mocks/decision/canon.html"
+  },
+  "steer": true
+}

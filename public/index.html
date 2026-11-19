@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>India Pulse · daily street-level indicators</title>
+<meta name="description" content="Fuel, gold, thali cost and AQI across 20 Indian cities, with the stocks they move. Refreshed every morning.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%2314213d'/%3E%3Crect y='26' width='32' height='6' fill='%23e8590c'/%3E%3Cpath d='M6 18h5l3-8 4 12 3-6h5' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="#">India <b>Pulse</b></a>
+  <p class="stamp" id="stamp">Loading…</p>
+  <a class="srclink" href="#sources">Sources &amp; method</a>
+</header>
+
+<main class="desk">
+  <aside id="boards" class="rail" aria-label="Indicator boards" aria-busy="true">
+    <article class="board loading"><header><h2>Fuel</h2></header><div class="rows"></div></article>
+    <article class="board loading"><header><h2>Gold</h2></header><div class="rows"></div></article>
+    <article class="board loading"><header><h2>Thali</h2></header><div class="rows"></div></article>
+    <article class="board loading"><header><h2>AQI</h2></header><div class="rows"></div></article>
+  </aside>
+
+  <section class="work" aria-label="Workspace">
+    <div class="workbar">
+      <div class="readout" id="readout" aria-live="polite"></div>
+      <div class="controls">
+        <div class="seg" id="metric" role="group" aria-label="Metric"></div>
+        <label class="ctl">City <select id="city"></select></label>
+        <div class="seg" id="range" role="group" aria-label="Time range">
+          <button data-r="7">7D</button><button data-r="30">30D</button><button data-r="90" aria-pressed="true">90D</button><button data-r="0">All</button>
+        </div>
+        <label class="ctl">Overlay <select id="stock"></select></label>
+      </div>
+    </div>
+    <div id="plot" class="plot"></div>
+    <p class="legend" id="legend"></p>
+    <div class="lower">
+      <section class="pane" aria-labelledby="compare-h">
+        <div class="panehead"><h2 id="compare-h">Compare</h2><span class="hint" id="compare-hint"></span></div>
+        <div class="scroll"><table id="rank"></table></div>
+      </section>
+      <section class="pane" aria-labelledby="movers-h">
+        <div class="panehead"><h2 id="movers-h">Movers</h2><span class="hint">Day and week changes that cross alert lines</span></div>
+        <ol id="movers" class="scroll"></ol>
+      </section>
+    </div>
+  </section>
+</main>
+
+<footer id="sources" class="sources">
+  <div>
+    <h2>Sources</h2>
+    <ul id="status" class="status"></ul>
+  </div>
+  <ul class="notes">
+    <li><b>Fuel.</b> Metro petrol and diesel are IOC retail prices published by PPAC. Other cities come from goodreturns.in; their history before daily tracking began is reconstructed from monthly summaries and drawn dashed. CNG history is monthly.</li>
+    <li><b>Gold.</b> IBJA benchmark rates, PM where published, else AM. They exclude 3% GST and making charges and are the same nationwide.</li>
+    <li><b>Thali.</b> The cost of raw ingredients for one veg thali (rice, wheat, tur dal, onion, tomato, potato) at Agmarknet mandi modal prices. These are wholesale prices, not retail. Each city uses the median of its own district's markets, falling back to its state, then to all-India. Plate cost is shown as a 7-day average because a city's daily figure swings when only a few of its mandis report; the raw daily cost stays visible on the chart.</li>
+    <li><b>AQI.</b> The CPCB daily bulletin: a 24-hour average city AQI as of 4 PM.</li>
+  </ul>
+</footer>
+
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

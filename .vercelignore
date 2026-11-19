@@ -1,0 +1,4 @@
+# Only the static site is deployed; the scraper runs elsewhere.
+/*
+!/public
+!/vercel.json
