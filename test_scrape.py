@@ -37,6 +37,16 @@ def run():
     t = st.d["series"]["thali.Delhi"]
     assert t["2026-11-10"] == 10 and t["2026-11-11"] == 15 and t["2026-11-17"] == 30, t  # 17th window: 11th..17th
 
+    # fuel margin: 2025 Delhi petrol Rs 94.77, Brent $65, Rs 88/$ -> 94.77/1.194 - 21.90 - 4.39 - 35.98 = 17.10
+    assert round(scrape.spread(94.77, 65, 88, *scrape.DELHI_TAX["petrol"]), 2) == 17.10
+    # as-of join: Brent on a day with no fresh rupee quote uses the last one; days before any rupee quote are skipped
+    st.d["series"].update({"stock.BZ=F": {"2026-11-14": 60.0, "2026-11-17": 65.0}, "fuel.petrol.Delhi": {"2026-11-01": 94.77},
+                           "fuel.diesel.Delhi": {"2026-11-01": 87.67}})
+    scrape.yahoo = lambda st_, tk, key: st_.d["series"].setdefault(key, {"2026-11-16": 88.0})
+    scrape.fuel_margin(st)
+    m = st.d["series"]["fuel.margin.petrol"]
+    assert m == {"2026-11-17": 17.1}, m
+
     # published error strings must never contain an API key
     assert "abc123" not in scrape.redact("Max retries: /resource/x?api-key=abc123&format=json"), "key leaked"
 

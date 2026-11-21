@@ -4,9 +4,11 @@ on:
     - cron: "0 2 * * *"    # 07:30 IST: fuel (6 AM revision), gold AM, mandi, stocks
     - cron: "30 11 * * *"  # 17:00 IST: CPCB 4 PM AQI bulletin, gold PM
   workflow_dispatch:
-  push:                    # rerun whenever the scraper itself changes
+  # Rerun when the scraper changes, and when the PC pushes thali.json at 08:00 IST. GitHub runs the crons
+  # above hours late, but runs pushes at once, so the PC's push is what lands the data before the open.
+  push:
     branches: [main]
-    paths: ["scrape.py", "requirements.txt", ".github/workflows/scrape.yml"]
+    paths: ["scrape.py", "requirements.txt", ".github/workflows/scrape.yml", "public/data/thali.json"]
 permissions:
   contents: write
 concurrency: scrape

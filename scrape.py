@@ -66,7 +66,7 @@ THALI = {  # item: ([names...], agmarknet commodity code, kg per plate)
 }
 
 STOCKS = {
-    "fuel": ["IOC.NS", "BPCL.NS", "HINDPETRO.NS", "IGL.NS", "MGL.NS", "CONCOR.NS"],
+    "fuel": ["IOC.NS", "BPCL.NS", "HINDPETRO.NS", "IGL.NS", "MGL.NS", "CONCOR.NS", "BZ=F"],  # BZ=F: Brent, $/bbl
     "gold": ["TITAN.NS", "KALYANKJIL.NS", "MUTHOOTFIN.NS", "MANAPPURAM.NS"],
     "thali": ["^NSEBANK", "HINDUNILVR.NS", "JUBLFOOD.NS", "^CNXFMCG"],
     "aqi": ["APOLLOHOSP.NS", "BLUESTARCO.NS", "TMPV.NS", "OLAELEC.NS"],
@@ -342,18 +342,55 @@ def smooth_thali(st, window=7):
 
 
 # ---------------- Stocks ----------------
+def yahoo(st, tk, key):
+    r = get(f"https://query1.finance.yahoo.com/v8/finance/chart/{requests.utils.quote(tk)}",
+            params={"range": "6mo", "interval": "1d"}).json()["chart"]["result"][0]
+    for ts, close in zip(r["timestamp"], r["indicators"]["quote"][0]["close"]):
+        st.put(key, datetime.fromtimestamp(ts, IST).date(), close)
+    return r["meta"]
+
+
 def stocks_yahoo(st):
     for group, tickers in STOCKS.items():
         for tk in tickers:
             try:
-                r = get(f"https://query1.finance.yahoo.com/v8/finance/chart/{requests.utils.quote(tk)}",
-                        params={"range": "6mo", "interval": "1d"}).json()["chart"]["result"][0]
+                m = yahoo(st, tk, f"stock.{tk}")
             except Exception as e:
                 print(f"  stock {tk} failed: {e}")
                 continue
-            for ts, close in zip(r["timestamp"], r["indicators"]["quote"][0]["close"]):
-                st.put(f"stock.{tk}", datetime.fromtimestamp(ts, IST).date(), close)
-            st.d["meta"].setdefault("stocks", {})[tk] = {"group": group, "name": r["meta"].get("shortName") or tk}
+            st.d["meta"].setdefault("stocks", {})[tk] = {"group": group, "name": "Brent crude ($/bbl)" if tk == "BZ=F" else m.get("shortName") or tk}
+
+
+# ---------------- Fuel margin ----------------
+# Delhi price build-up: RSP = (price to dealer + excise + dealer commission) x (1 + VAT).
+# ponytail: hand-entered from IOC's Delhi price build-up (iocl.com, via PPAC); a tax change shifts the level,
+# not the day/week moves. Update these when excise or Delhi VAT change, or scrape the build-up if they drift.
+DELHI_TAX = {"petrol": (0.194, 21.90, 4.39), "diesel": (0.1675, 17.80, 3.02)}  # (VAT, excise Rs/L, dealer Rs/L)
+BBL_L = 158.987
+
+
+def spread(rsp, brent, usdinr, vat, excise, dealer):
+    """Rs/L an OMC keeps after taxes, dealer commission and the crude in the litre: pays for refining,
+    freight and its marketing margin. Moves one-for-one with OMC margins while pump prices are frozen."""
+    return rsp / (1 + vat) - excise - dealer - brent * usdinr / BBL_L
+
+
+def asof(s, iso):
+    k = max((x for x in s if x <= iso), default=None)
+    return s[k] if k else None
+
+
+def fuel_margin(st):
+    yahoo(st, "INR=X", "fx.usdinr")
+    ser = st.d["series"]
+    brent, fx = ser.get("stock.BZ=F") or {}, ser["fx.usdinr"]
+    assert brent, "no Brent series (stocks job failed?)"
+    for kind, tax in DELHI_TAX.items():
+        rsp = ser[f"fuel.{kind}.Delhi"]
+        for iso, b in brent.items():
+            r, f = asof(rsp, iso), asof(fx, iso)
+            if r and f:
+                st.put(f"fuel.margin.{kind}", date.fromisoformat(iso), spread(r, b, f, *tax))
 
 
 def redact(s):
@@ -375,7 +412,8 @@ def main():
                 jobs.append((f"fuel_{kind}_{city}", lambda c=city, s=slug, k=kind: fuel_goodreturns(st, c, s, k)))
         jobs.append((f"cng_{city}", lambda c=city, s=slug: cng_goodreturns(st, c, s)))
     jobs += [("gold_ibja", lambda: gold_ibja(st)), ("aqi_cpcb", lambda: aqi_cpcb(st)),
-             ("thali_mandi", lambda: thali_mandi(st)), ("stocks", lambda: stocks_yahoo(st))]
+             ("thali_mandi", lambda: thali_mandi(st)), ("stocks", lambda: stocks_yahoo(st)),
+             ("fuel_margin", lambda: fuel_margin(st))]
     if "--skip-thali" in sys.argv:
         jobs = [j for j in jobs if j[0] != "thali_mandi"]
     run_jobs(st, jobs)

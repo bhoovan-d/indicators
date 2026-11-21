@@ -10,7 +10,8 @@ A daily dashboard of street-level Indian indicators for traders: fuel, gold, the
 | Gold 24K/22K, silver | IBJA 30-day PDF | 30 days, then grows daily |
 | Thali (veg, ₹/plate) | Agmarknet mandi modal prices via the data.gov.in API | Backfills 90 days once `DATA_GOV_KEY` is set |
 | AQI | CPCB daily 4 PM bulletin PDF | 90 days |
-| Linked stocks | Yahoo Finance chart API | 6 months |
+| Linked stocks, Brent, ₹/$ | Yahoo Finance chart API | 6 months |
+| OMC margin (petrol, diesel) | Delhi pump price less Delhi taxes (fixed in `DELHI_TAX` in `scrape.py`: update when excise or VAT change) and Brent × ₹/$ | Same as Brent |
 
 ## Run locally
 
@@ -29,7 +30,7 @@ Live at https://india-pulse-phi.vercel.app (Vercel project `bhoovan-int/india-pu
 
 | What | Where it runs | When | Writes |
 |---|---|---|---|
-| Fuel, gold, AQI, stocks | GitHub Actions (`.github/workflows/scrape.yml`, `scrape.py --skip-thali`) | 07:30 and 17:00 IST, and whenever the scraper changes | `public/data/indicators.json` |
+| Fuel, gold, AQI, stocks | GitHub Actions (`.github/workflows/scrape.yml`, `scrape.py --skip-thali`) | Right after the PC pushes thali (about 08:00 IST), whenever the scraper changes, and on the 07:30 and 17:00 IST crons (GitHub runs these hours late, so they are only a fallback) | `public/data/indicators.json` |
 | Thali | This PC: Windows task **India Pulse thali** runs `run_thali.ps1` (`scrape.py --only-thali`) | 08:00 daily, or at next login if the PC was off | `public/data/thali.json` |
 
 Thali runs from a PC because data.gov.in times out every connection from GitHub's US servers. The two writers use separate files, so their commits never conflict, and the dashboard merges them.

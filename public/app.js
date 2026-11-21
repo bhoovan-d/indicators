@@ -45,18 +45,18 @@ const CITYWISE = ["fuel.petrol", "fuel.diesel", "fuel.cng", "thali", "aqi"];
 const isCityKey = (k) => CITYWISE.includes(kindOf(k)) && cityOf(k) !== "India";
 const LABEL = { "fuel.petrol": "Petrol", "fuel.diesel": "Diesel", "fuel.cng": "CNG", "gold.24k": "Gold 24K", "gold.22k": "Gold 22K",
   "gold.silver": "Silver", thali: "Veg thali", aqi: "AQI", "mandi.onion": "Onion", "mandi.tomato": "Tomato", "mandi.potato": "Potato",
-  "mandi.rice": "Rice", "mandi.wheat": "Wheat", "mandi.turdal": "Tur dal" };
+  "mandi.rice": "Rice", "mandi.wheat": "Wheat", "mandi.turdal": "Tur dal", "fuel.margin.petrol": "Petrol margin", "fuel.margin.diesel": "Diesel margin" };
 const UNIT = { "fuel.petrol": "₹/L", "fuel.diesel": "₹/L", "fuel.cng": "₹/kg", "gold.24k": "₹/10 g", "gold.22k": "₹/10 g", "gold.silver": "₹/kg",
-  thali: "₹/plate, 7-day avg", aqi: "index 0–500" };
+  thali: "₹/plate, 7-day avg", aqi: "index 0–500", "fuel.margin": "₹/L, Delhi, estimate" };
 const unitOf = (k) => t(UNIT[k] || UNIT[kindOf(k)] || (k.startsWith("mandi") ? "₹/kg, mandi" : ""));
 const dpOf = (k) => k.startsWith("gold") || k.startsWith("aqi") ? 0 : 2;
-const nameOf = (k) => k.startsWith("gold") ? t(LABEL[k]) : `${t(LABEL[kindOf(k)] || kindOf(k))} · ${t(cityOf(k) === "India" ? "all-India" : cityOf(k))}`;
-const sourceOf = (k) => t(k.startsWith("gold") ? "IBJA" : k.startsWith("aqi") ? "CPCB bulletin" : groupOf(k) === "thali" ? "Agmarknet via data.gov.in (wholesale)" :
+const nameOf = (k) => LABEL[k] ? t(LABEL[k]) : `${t(LABEL[kindOf(k)] || kindOf(k))} · ${t(cityOf(k) === "India" ? "all-India" : cityOf(k))}`;
+const sourceOf = (k) => t(k.startsWith("fuel.margin") ? "Delhi pump price (PPAC) less fixed Delhi taxes and Brent × ₹/$ (Yahoo)" : k.startsWith("gold") ? "IBJA" : k.startsWith("aqi") ? "CPCB bulletin" : groupOf(k) === "thali" ? "Agmarknet via data.gov.in (wholesale)" :
   ["Delhi", "Mumbai", "Chennai", "Kolkata"].includes(cityOf(k)) && !k.includes("cng") ? "PPAC (IOC retail)" : "goodreturns.in");
 
 // the metric switch shown in the workspace for each board (labels are translated when drawn)
 const METRICS = {
-  fuel: (c) => [["Petrol", `fuel.petrol.${c}`], ["Diesel", `fuel.diesel.${c}`], ["CNG", `fuel.cng.${c}`]],
+  fuel: (c) => [["Petrol", `fuel.petrol.${c}`], ["Diesel", `fuel.diesel.${c}`], ["CNG", `fuel.cng.${c}`], ["Petrol margin", "fuel.margin.petrol"], ["Diesel margin", "fuel.margin.diesel"]],
   gold: () => [["24K", "gold.24k"], ["22K", "gold.22k"], ["Silver", "gold.silver"]],
   thali: (c) => [[t("Thali · {c}", { c: t(c) }), `thali.${c}`], [t("Thali · {c}", { c: t("India") }), "thali.India"], ["Onion", "mandi.onion.India"], ["Tomato", "mandi.tomato.India"],
                  ["Potato", "mandi.potato.India"], ["Rice", "mandi.rice.India"], ["Wheat", "mandi.wheat.India"], ["Tur dal", "mandi.turdal.India"]],
@@ -74,7 +74,8 @@ function boards(c) {
   const ex = aqiExtremes();
   return [
     { id: "fuel", title: "Fuel", src: "₹/L · PPAC, goodreturns", rows: [
-      { k: `fuel.petrol.${c}`, label: "Petrol" }, { k: `fuel.diesel.${c}`, label: "Diesel" }, { k: `fuel.cng.${c}`, label: "CNG", note: "₹/kg" }] },
+      { k: `fuel.petrol.${c}`, label: "Petrol" }, { k: `fuel.diesel.${c}`, label: "Diesel" }, { k: `fuel.cng.${c}`, label: "CNG", note: "₹/kg" },
+      { k: "fuel.margin.petrol", label: "Petrol margin", note: "OMC ₹/L, Delhi est." }, { k: "fuel.margin.diesel", label: "Diesel margin", note: "OMC ₹/L, Delhi est." }] },
     { id: "gold", title: "Gold", src: "₹/10 g · IBJA, all India", rows: [
       { k: "gold.24k", label: "24K", pct: true }, { k: "gold.22k", label: "22K", pct: true }, { k: "gold.silver", label: "Silver", note: "₹/kg", pct: true }] },
     { id: "thali", title: "Thali", src: "₹/plate · 7-day avg · mandi", rows: [
@@ -90,7 +91,7 @@ function boards(c) {
 // ---------- alerts ----------
 function alerts() {
   const out = [], fresh = (s) => s && s.date >= shift(today(), -2);
-  const add = (sev, k, what, why, mag, num) => out.push({ sev, k, what, why, mag, num, board: groupOf(k), city: cityOf(k) });
+  const add = (sev, k, what, why, mag, num) => out.push({ sev, k, what, why, mag, num, board: groupOf(k), city: isCityKey(k) ? cityOf(k) : null });
   for (const c of D.meta.cities) {
     for (const f of ["petrol", "diesel", "cng"]) {
       const k = `fuel.${f}.${c}`, s = stat(k), n = t(LABEL["fuel." + f]).toLowerCase(), cc = t(c);
@@ -103,6 +104,10 @@ function alerts() {
     else if (fresh(a) && a.dw != null && a.dw >= 50) add(2, `aqi.${c}`, t("{c} AQI up over the week", { c: t(c) }), `${t(AQI[aqiCat(a.v)][1])} · ${a.v}`, sgn(a.dw, 0), a.dw);
     const th = stat(`thali.${c}`);
     if (fresh(th) && th.pw != null && Math.abs(th.pw) >= 5) add(2, `thali.${c}`, t("{c} thali cost, week", { c: t(c) }), t("₹{v} a plate", { v: fmt(th.v) }), `${sgn(th.pw, 1)}%`, th.pw);
+  }
+  for (const k of ["fuel.margin.petrol", "fuel.margin.diesel"]) {  // ₹1/L of margin is roughly a 1.5–2% move in Brent
+    const s = stat(k);
+    if (fresh(s) && s.dw != null && Math.abs(s.dw) >= 1) add(2, k, t("{x} week move", { x: t(LABEL[k]) }), t("now ₹{v}", { v: fmt(s.v) }), sgn(s.dw), s.dw);
   }
   for (const k of ["gold.24k", "gold.silver"]) {
     const s = stat(k);
@@ -117,14 +122,14 @@ function alerts() {
 function renderBoards(al) {
   const active = groupOf(st.sel);
   $("#boards").innerHTML = boards(st.city).map((b) => {
-    const hits = al.filter((a) => a.board === b.id && (b.id === "gold" || a.city === st.city));
+    const hits = al.filter((a) => a.board === b.id && (!a.city || a.city === st.city));
     const any = b.rows.some((r) => pts(r.k).length);
     const cell = Math.max(3, ...b.rows.map((r) => { const s = stat(r.k); return s ? fmt(s.v, dpOf(r.k)).length : 1; }));
     const rows = !any ? `<div class="empty"><b>${t("Waiting for data")}</b>${esc(t(b.empty || "No data yet."))}</div>` : b.rows.map((r) => {
       const s = stat(r.k), dp = dpOf(r.k);
       if (!s) return `<button class="row" disabled><span class="k">${esc(t(r.label))}<small>${esc(t(r.note || ""))}</small></span><span class="v">—</span><span class="d flat">${t("no data")}</span></button>`;
       const dd = r.pct ? `${sgn(s.pd, 1)}%` : sgn(s.dd, dp), dw = r.pct ? `${sgn(s.pw, 1)}%` : sgn(s.dw, dp);
-      const revised = !st.flipped && s.dd != null && Math.abs(s.dd) > 1e-9 && s.date >= shift(today(), -1);
+      const revised = !st.flipped && !r.k.includes("margin") && s.dd != null && Math.abs(s.dd) > 1e-9 && s.date >= shift(today(), -1);
       return `<button class="row${revised ? " revised" : ""}" data-k="${r.k}" aria-pressed="${r.k === st.sel}">
         <span class="k${r.me ? " city-me" : ""}">${esc(t(r.label))}${r.aqi ? aqiChip(s.v) : ""}<small>${esc(r.note ? t(r.note) : day(s.date))}</small></span>
         <span class="v"><i>${fmt(s.v, dp)}</i></span>
@@ -178,7 +183,7 @@ function renderChart() {
   const data = pts(k).filter(([d]) => d >= from).map(([time, value]) => ({ time, value }));
   const rs = realSince(k), cut = rs ? data.findIndex((p) => p.time >= rs) : 0;
   const mk = (dash) => chart.addLineSeries({ color: "#133b2f", lineWidth: 2, lineStyle: dash ? 2 : 0, priceScaleId: "left",
-    lineType: k.startsWith("fuel") ? 1 : 0, priceLineVisible: false, lastValueVisible: !dash });
+    lineType: k.startsWith("fuel") && !k.includes("margin") ? 1 : 0, priceLineVisible: false, lastValueVisible: !dash });
   if (cut > 0) { const a = mk(true); a.setData(data.slice(0, cut + 1)); main.push(a); }
   if (cut < 0) { const a = mk(true); a.setData(data); main.push(a); }
   else { const b = mk(false); b.setData(cut > 0 ? data.slice(cut) : data); main.push(b); }
@@ -237,7 +242,7 @@ function renderStatus() {
   const groups = {};
   for (const [name, v] of Object.entries(D.meta.status || {})) {
     const g = { fuel_ppac: "Fuel · PPAC metros", gold_ibja: "Gold · IBJA", aqi_cpcb: "AQI · CPCB bulletin", thali_mandi: "Thali · Agmarknet",
-      stocks: "Stocks · Yahoo Finance" }[name] || (/^(fuel|cng)_/.test(name) ? "Fuel · goodreturns (16 cities)" : name);
+      stocks: "Stocks · Yahoo Finance", fuel_margin: "Fuel margin · Brent, ₹/$" }[name] || (/^(fuel|cng)_/.test(name) ? "Fuel · goodreturns (16 cities)" : name);
     (groups[t(g)] ||= []).push(v);
   }
   $("#status").innerHTML = Object.entries(groups).map(([g, vs]) => {
