@@ -445,3 +445,17 @@ Promise.all([getJSON("data/indicators.json"), getJSON("data/thali.json").catch((
 // installable app: the service worker serves the last-fetched data when offline (sw.js)
 if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 addEventListener("online", renderStamp); addEventListener("offline", renderStamp);
+
+// Install button: Chrome/Edge/Samsung hand us their install prompt; iPhone has none, so explain Safari's Share menu
+let installPrompt;
+const installBtn = $("#install");
+const installed = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installPrompt = e; installBtn.hidden = false; });
+addEventListener("appinstalled", () => { installBtn.hidden = true; });
+if (!installed && /iphone|ipad|ipod/i.test(navigator.userAgent)) installBtn.hidden = false;
+installBtn.addEventListener("click", async () => {
+  if (!installPrompt) return alert(t("Open this page in Safari, tap Share, then Add to Home Screen."));
+  installPrompt.prompt();
+  if ((await installPrompt.userChoice).outcome === "accepted") installBtn.hidden = true;
+  installPrompt = null;
+});

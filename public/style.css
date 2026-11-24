@@ -43,6 +43,10 @@ button, select { font: inherit; color: inherit; }
 .srclink:hover { color: #fff; box-shadow: inset 0 -2px #fff; }
 .bar a:focus-visible { outline-color: #fff; }
 .srctab { display: none; }
+.install { background: #fff; color: var(--canopy); border: 0; border-radius: 3px; padding: 5px 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.install:hover { background: var(--enamel); }
+.install:focus-visible { outline-color: #fff; }
+.install[hidden] { display: none; }
 /* installed app: clear the notch / status bar and the curved corners in landscape */
 .bar { height: calc(var(--bar) + env(safe-area-inset-top)); padding-top: env(safe-area-inset-top);
   padding-left: max(24px, env(safe-area-inset-left)); padding-right: max(24px, env(safe-area-inset-right)); }
