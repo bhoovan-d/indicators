@@ -1,0 +1,21 @@
+{
+  "name": "India Pulse",
+  "short_name": "India Pulse",
+  "description": "Fuel, gold, thali cost and AQI across 20 Indian cities, with the stocks they move.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#e7ebe6",
+  "theme_color": "#133b2f",
+  "categories": ["finance", "news"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "City matrix", "url": "/#cities", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

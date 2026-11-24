@@ -42,6 +42,10 @@ button, select { font: inherit; color: inherit; }
 .srclink { margin-left: auto; color: #bfd0c8; font-weight: 600; text-decoration: none; }
 .srclink:hover { color: #fff; box-shadow: inset 0 -2px #fff; }
 .bar a:focus-visible { outline-color: #fff; }
+.srctab { display: none; }
+/* installed app: clear the notch / status bar and the curved corners in landscape */
+.bar { height: calc(var(--bar) + env(safe-area-inset-top)); padding-top: env(safe-area-inset-top);
+  padding-left: max(24px, env(safe-area-inset-left)); padding-right: max(24px, env(safe-area-inset-right)); }
 .lang { background: var(--canopy-2); color: #fff; border: 1px solid #3b6b5a; border-radius: 3px; padding: 3px 6px; font-weight: 600; cursor: pointer; }
 .lang:focus-visible { outline-color: #fff; }
 .langicon { display: none; }
@@ -214,7 +218,30 @@ tr.on td { font-weight: 700; }
   .notes { padding-top: 0; }
 }
 @media (max-width: 640px) {
-  .bar { padding: 0 16px; gap: 12px; }
+  .bar { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); gap: 12px; }
+  /* phones: views move to a bottom tab bar, within thumb reach */
+  body { padding-bottom: calc(var(--bar) + env(safe-area-inset-bottom)); }
+  .views {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; gap: 0;
+    padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background: var(--canopy); border-top: 1px solid var(--canopy-2);
+  }
+  .views a { flex: 1; height: var(--bar); display: grid; place-items: center; padding: 0; border-radius: 0;
+    font: 700 18px/1 var(--digits); letter-spacing: .06em; text-transform: uppercase; }
+  .views a[aria-current="page"] { box-shadow: inset 0 3px #fff; }
+  .srctab { display: grid; }
+  .brand { font-size: 22px; white-space: nowrap; }
+  .stamp { line-height: 1.2; }
+  .controls { width: 100%; }
+  /* 44px touch targets; 16px selects so iOS doesn't zoom on focus */
+  .seg { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .seg button { min-height: 44px; padding: 0 14px; }
+  .ctl { flex: 1 1 100%; }
+  .ctl select { flex: 1; max-width: none; min-height: 44px; font-size: 16px; }
+  .row { min-height: 52px; }
+  th button { padding: 12px 10px; }
+  td { padding: 8px 10px; }
+  #movers li button { padding: 10px 16px; }
   .stamp { font-size: 12px; }
   .srclink { display: none; }
   /* phones: a compact "अ/A" face with the real select invisible on top of it */
