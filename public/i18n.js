@@ -8,6 +8,7 @@ const I18N = {
   "Desk": ["डेस्क", "ડેસ્ક", "डेस्क"],
   "Cities": ["शहर", "શહેરો", "शहरे"],
   "offline": ["ऑफ़लाइन", "ઑફલાઇન", "ऑफलाइन"],
+  "Show all {n}": ["सभी {n} देखें", "બધા {n} જુઓ", "सर्व {n} पाहा"],
   "Install app": ["ऐप इंस्टॉल करें", "ઍપ ઇન્સ્ટોલ કરો", "ॲप इन्स्टॉल करा"],
   "Open this page in Safari, tap Share, then Add to Home Screen.": ["यह पेज Safari में खोलें, Share दबाएँ, फिर Add to Home Screen चुनें।",
     "આ પેજ Safari માં ખોલો, Share દબાવો, પછી Add to Home Screen પસંદ કરો.", "हे पेज Safari मध्ये उघडा, Share दाबा, मग Add to Home Screen निवडा."],

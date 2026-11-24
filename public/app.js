@@ -174,6 +174,8 @@ function renderChart() {
     chart = LC.createChart($("#plot"), { autoSize: true, layout: { background: { color: "#fbfcfa" }, textColor: "#44564f", fontFamily: "Barlow, sans-serif" },
       grid: { vertLines: { color: "#e6ece8" }, horzLines: { color: "#e6ece8" } }, rightPriceScale: { visible: true, borderColor: "#cdd6d0" },
       leftPriceScale: { visible: true, borderColor: "#cdd6d0" }, timeScale: { borderColor: "#cdd6d0" }, crosshair: { mode: 0 },
+      // a vertical swipe over the chart scrolls the page (phones); the wheel only zooms on desktop
+      handleScroll: { vertTouchDrag: false, mouseWheel: !phone.matches }, handleScale: { mouseWheel: !phone.matches },
       localization: { priceFormatter: (p) => p.toLocaleString("en-IN", { maximumFractionDigits: 2 }) } });
   }
   chart.applyOptions({ localization: { locale: LOC() } });
@@ -232,11 +234,15 @@ function renderCompare() {
       <td class="barc">${cityWise ? `<span style="width:${hi === lo ? 100 : ((r.s.v - lo) / (hi - lo) * 100).toFixed(1)}%"></span>` : ""}</td></tr>`).join("")}</tbody>`;
 }
 
+const phone = matchMedia("(max-width: 640px)");
 function renderMovers(al) {
-  $("#movers").innerHTML = al.length ? al.slice(0, 40).map((a) => `<li><button class="sev${a.sev}" data-mover="${a.k}">
-      <span class="what">${esc(a.what)}</span><span class="why">${esc(a.why)}</span><span class="mag ${tone(a.num)}">${esc(a.mag)}</span></button></li>`).join("")
+  const n = phone.matches && !st.allMovers ? 6 : 40;  // phones: the list sits in the page, so show the top few
+  $("#movers").innerHTML = al.length ? al.slice(0, n).map((a) => `<li><button class="sev${a.sev}" data-mover="${a.k}">
+      <span class="what">${esc(a.what)}</span><span class="why">${esc(a.why)}</span><span class="mag ${tone(a.num)}">${esc(a.mag)}</span></button></li>`).join("") +
+      (al.length > n ? `<li><button class="more" data-more>${t("Show all {n}", { n: Math.min(al.length, 40) })}</button></li>` : "")
     : `<li class="empty"><b>${t("Quiet morning")}</b>${t("Nothing crossed an alert line today.")}</li>`;
 }
+phone.addEventListener("change", () => D && renderMovers(AL));
 
 function renderStatus() {
   const groups = {};
@@ -386,6 +392,7 @@ document.addEventListener("click", (e) => {
   if (ms) { st.msort = { col: ms, dir: st.msort.col === ms ? -st.msort.dir : ms === "c" ? 1 : -1 }; return renderCities(); }
   const mm = tg.closest("[data-mmode]")?.dataset.mmode; if (mm) { st.mmode = mm; store.set("mmode", mm); return renderCities(); }
   const k = tg.closest("[data-k]")?.dataset.k; if (k) return select(k);
+  if (tg.closest("[data-more]")) { st.allMovers = true; return renderMovers(AL); }
   const m = tg.closest("[data-mover]")?.dataset.mover;
   if (m) {
     if (groupOf(m) !== groupOf(st.sel)) st.stock = null;
@@ -406,7 +413,7 @@ $("#stock").addEventListener("change", (e) => { st.stock = e.target.value; rende
 const getJSON = (u) => fetch(u, { cache: "no-cache" }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
 function renderStamp() {
   $("#stamp").textContent = D ? t("Data as of {d} IST", { d: new Date(D.updated).toLocaleString(LOC(),
-    { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" }) })
+    { day: "numeric", month: "short", year: phone.matches ? undefined : "numeric", hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" }) })
     : t(D === null ? "Data unavailable" : "Loading…");
   if (!navigator.onLine) $("#stamp").textContent += ` · ${t("offline")}`;
 }
@@ -433,6 +440,9 @@ Promise.all([getJSON("data/indicators.json"), getJSON("data/thali.json").catch((
     Object.assign(d.meta.status, th.meta.status);
   }
   D = d;
+  // Yahoo gives names in capitals ("HINDUSTAN PETROLEUM CORP"); title case reads and fits better
+  for (const m of Object.values(D.meta.stocks || {}))
+    if (m.name === m.name.toUpperCase()) m.name = m.name.toLowerCase().replace(/(^|[\s(&.-])(\p{L})/gu, (_, a, b) => a + b.toUpperCase());
   if (!D.meta.cities.includes(st.city)) st.city = "Delhi";
   if (!pts(st.sel).length) st.sel = `fuel.petrol.${st.city}`;
   setLang(lang); showView();

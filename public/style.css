@@ -221,44 +221,103 @@ tr.on td { font-weight: 700; }
   .sources { grid-template-columns: 1fr; }
   .notes { padding-top: 0; }
 }
+/* phones: one column, fluid sizes, bottom tab bar, nothing scrolls inside the page */
 @media (max-width: 640px) {
-  .bar { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); gap: 12px; }
-  /* phones: views move to a bottom tab bar, within thumb reach */
+  :root { --pad: clamp(12px, 4vw, 16px); --top: calc(60px + env(safe-area-inset-top)); }
+  html { -webkit-tap-highlight-color: transparent; }
   body { padding-bottom: calc(var(--bar) + env(safe-area-inset-bottom)); }
+
+  /* header: brand over the data stamp, actions on the right */
+  .bar {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "brand install lang" "stamp install lang";
+    align-content: center; gap: 1px 8px; height: var(--top); border-bottom-width: 3px;
+    padding-left: max(var(--pad), env(safe-area-inset-left)); padding-right: max(var(--pad), env(safe-area-inset-right));
+  }
+  .brand { grid-area: brand; font-size: clamp(20px, 6.2vw, 24px); white-space: nowrap; }
+  .stamp { grid-area: stamp; font-size: 12px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .srclink { display: none; }
+  .install { grid-area: install; align-self: center; min-height: 36px; padding: 0 12px; font-size: 14px; }
+  /* a compact "अ/A" face with the real select invisible on top of it */
+  .langbox { grid-area: lang; align-self: center; position: relative; }
+  .langicon { display: grid; place-items: center; min-width: 40px; height: 36px; padding: 0 8px; border: 1px solid #3b6b5a; border-radius: 3px; background: var(--canopy-2); color: #fff; font-weight: 600; font-size: 13px; white-space: nowrap; }
+  .langbox:focus-within .langicon { outline: 2px solid #fff; outline-offset: 2px; }
+  .langbox .lang { position: absolute; inset: 0; width: 100%; opacity: 0; font-size: 16px; }
+
+  /* bottom tab bar, within thumb reach */
   .views {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; gap: 0;
     padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    background: var(--canopy); border-top: 1px solid var(--canopy-2);
+    background: var(--canopy); box-shadow: 0 -1px 0 var(--canopy-2);
   }
   .views a { flex: 1; height: var(--bar); display: grid; place-items: center; padding: 0; border-radius: 0;
-    font: 700 18px/1 var(--digits); letter-spacing: .06em; text-transform: uppercase; }
+    font: 700 17px/1 var(--digits); letter-spacing: .06em; text-transform: uppercase; transition: background-color .2s, color .2s; }
   .views a[aria-current="page"] { box-shadow: inset 0 3px #fff; }
   .srctab { display: grid; }
-  .brand { font-size: 22px; white-space: nowrap; }
-  .stamp { line-height: 1.2; }
-  .controls { width: 100%; }
-  /* 44px touch targets; 16px selects so iOS doesn't zoom on focus */
-  .seg { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
-  .seg button { min-height: 44px; padding: 0 14px; }
-  .ctl { flex: 1 1 100%; }
-  .ctl select { flex: 1; max-width: none; min-height: 44px; font-size: 16px; }
-  .row { min-height: 52px; }
-  th button { padding: 12px 10px; }
-  td { padding: 8px 10px; }
-  #movers li button { padding: 10px 16px; }
-  .stamp { font-size: 12px; }
-  .srclink { display: none; }
-  /* phones: a compact "अ/A" face with the real select invisible on top of it */
-  .langbox { position: relative; margin-left: auto; }
-  .langicon { display: block; padding: 4px 7px; border: 1px solid #3b6b5a; border-radius: 3px; background: var(--canopy-2); color: #fff; font-weight: 600; font-size: 13px; white-space: nowrap; }
-  .langbox:focus-within .langicon { outline: 2px solid #fff; outline-offset: 2px; }
-  .langbox .lang { position: absolute; inset: 0; width: 100%; opacity: 0; }
-  .views a { padding: 5px 8px; }
-  .cities { padding: 12px 16px; }
-  .ramp { margin-left: 0; }
-  .desk { padding: 12px 16px; }
-  .work { grid-template-rows: auto 280px auto auto; }
-  .controls { margin-left: 0; }
-  td.barc { display: none; }
-  .sources { padding: 8px 16px 32px; }
+
+  /* boards: full-bleed swipe strip, the next board peeking in */
+  .desk { padding: 12px 0 16px; gap: 12px; }
+  .rail { padding: 0 var(--pad) 2px; scroll-padding-inline: var(--pad); gap: 10px; scrollbar-width: none; overscroll-behavior-x: contain; }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail .board { flex: 0 0 calc(100% - 2 * var(--pad) - 24px); }
+  .board header { padding: 8px 12px; }
+  .row { grid-template-columns: minmax(0, 1fr) auto minmax(58px, auto); column-gap: 8px; min-height: 54px; padding: 6px 12px; }
+  .row .k small, .d small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .v { font-size: clamp(24px, 7.4vw, 30px); padding: 4px 7px 2px; }
+
+  /* workspace */
+  .work { margin: 0 var(--pad); grid-template-rows: auto clamp(240px, 64vw, 340px) auto auto; overflow: clip; }
+  .workbar { padding: 14px 14px 12px; gap: 14px; }
+  .readout { display: grid; grid-template-columns: auto auto auto 1fr; align-items: baseline; gap: 2px 12px; width: 100%; }
+  .readout h2 { grid-column: 1 / -1; font-size: 20px; }
+  .readout .big { font-size: clamp(30px, 9.5vw, 38px); }
+  .readout .hl { grid-column: 1 / -1; font-size: 12px; margin-top: 4px; }
+  .controls { width: 100%; margin-left: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "metric metric" "city stock" "range range"; gap: 12px 10px; }
+  #metric { grid-area: metric; }
+  .controls > label:first-of-type { grid-area: city; }
+  .controls > label:last-of-type { grid-area: stock; }
+  #range { grid-area: range; }
+  /* metric switch: a row of chips that scrolls sideways, fading out at the edge */
+  #metric { display: flex; gap: 6px; border: 0; border-radius: 0; overflow-x: auto; scrollbar-width: none; margin-right: -14px; padding-right: 28px;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); }
+  #metric::-webkit-scrollbar { display: none; }
+  #metric button, #metric button + button { flex: none; border: 1px solid var(--rule); border-radius: 3px; }
+  #metric button[aria-pressed="true"] { border-color: var(--canopy); }
+  .seg button { min-height: 44px; padding: 0 14px; transition: background-color .15s, color .15s; }
+  #range { display: flex; }
+  #range button { flex: 1; }
+  .ctl { display: grid; gap: 4px; min-width: 0; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+  .ctl span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ctl select { width: 100%; max-width: none; min-height: 44px; font-size: 16px; letter-spacing: 0; text-transform: none; }
+  .legend { padding: 8px 14px 10px; gap: 4px 16px; font-size: 12px; }
+
+  /* compare + movers: full height in the page, no scroll boxes inside it */
+  .scroll { max-height: none; overflow: visible; }
+  #rank thead th { top: var(--top); white-space: nowrap; }
+  .panehead { padding: 12px 14px 8px; }
+  #rank th button { padding: 10px 6px; }
+  #rank td { padding: 9px 6px; }
+  #rank th:first-child, #rank td.rk, #rank th:last-child, #rank td.barc { display: none; }  /* row order already shows rank */
+  #rank td:nth-child(2), #rank th:nth-child(2) button { padding-left: 14px; }
+  #rank td:nth-child(5), #rank th:nth-child(5) button { padding-right: 14px; }
+  #rank td:nth-child(2) { width: 100%; white-space: normal; line-height: 1.2; font-size: 14px; }
+  #rank td.val { font-size: 17px; }
+  #movers li button { padding: 10px 14px; min-height: 56px; }
+  #movers .more { display: block; width: 100%; min-height: 48px; border: 0; background: none; color: var(--canopy); font-weight: 700; text-align: center; cursor: pointer; }
+
+  /* press feedback replaces hover on touch */
+  .row:active, #rank tbody tr:active, #movers li button:active, .more:active { background: var(--sel-row); }
+
+  /* cities and sources */
+  .cities { padding: 12px var(--pad) 16px; }
+  .mhead { padding: 12px 14px; }
+  .mhead .seg { width: 100%; }
+  .mhead .seg button { flex: 1; }
+  .ramp { margin-left: 0; flex-wrap: wrap; }
+  .mwrap { scrollbar-width: none; }
+  .sources { gap: 16px; padding: 8px var(--pad) 32px; }
+  .notes { padding-left: 16px; }
 }
+@media (max-width: 640px) and (prefers-reduced-motion: no-preference) {
+  .desk:not([hidden]), .cities:not([hidden]) { animation: viewin .28s cubic-bezier(.16, 1, .3, 1); }
+}
+@keyframes viewin { from { opacity: 0; transform: translateY(6px); } }
