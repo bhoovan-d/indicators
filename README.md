@@ -13,6 +13,10 @@ A daily dashboard of street-level Indian indicators for traders: fuel, gold, the
 | Linked stocks, Brent, ₹/$ | Yahoo Finance chart API | 6 months |
 | OMC margin (petrol, diesel) | Delhi pump price less Delhi taxes (fixed in `DELHI_TAX` in `scrape.py`: update when excise or VAT change) and Brent × ₹/$ | Same as Brent |
 
+## Install on a phone
+
+India Pulse is an installable web app (PWA). On Android, open the site in Chrome and tap **Install app** (or ⋮ → Add to home screen). On iPhone, open it in Safari and use Share → Add to Home Screen. `public/sw.js` keeps the last data it fetched, so the app opens offline with those numbers. Pushes update the installed app on its next launch.
+
 ## Run locally
 
 ```powershell

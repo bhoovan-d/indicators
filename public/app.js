@@ -348,9 +348,10 @@ function renderCities() {
 // ---------- views: desk / cities (switching never scrolls, the back button works) ----------
 function showView() {
   const v = location.hash === "#cities" ? "cities" : location.hash === "#desk" || location.hash === "" ? "desk" : null;
+  const tab = location.hash === "#sources" ? "sources" : v;  // the phone tab bar has a Sources tab
+  document.querySelectorAll(".views a").forEach((a) => a.dataset.view === tab ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
   if (!v) return;  // other anchors (e.g. #sources) keep the current view
   $(".desk").hidden = v !== "desk"; $("#cities").hidden = v !== "cities";
-  document.querySelectorAll(".views a").forEach((a) => a.dataset.view === v ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
   if (v === "cities") renderCities();
   scrollTo(0, 0);
 }
@@ -407,6 +408,7 @@ function renderStamp() {
   $("#stamp").textContent = D ? t("Data as of {d} IST", { d: new Date(D.updated).toLocaleString(LOC(),
     { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" }) })
     : t(D === null ? "Data unavailable" : "Loading…");
+  if (!navigator.onLine) $("#stamp").textContent += ` · ${t("offline")}`;
 }
 
 // ---------- language switch: static text carries data-i (key = its English text) or data-ia (aria-label key) ----------
@@ -439,3 +441,7 @@ Promise.all([getJSON("data/indicators.json"), getJSON("data/thali.json").catch((
   $("#boards").innerHTML = `<div class="board empty"><b>${t("Couldn't load today's data")}</b>${esc(t("indicators.json failed to load ({e}). Reload the page; if it keeps failing, the morning scrape may not have run yet.", { e: err.message }))}</div>`;
   renderStamp();
 });
+
+// installable app: the service worker serves the last-fetched data when offline (sw.js)
+if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+addEventListener("online", renderStamp); addEventListener("offline", renderStamp);
